@@ -22,7 +22,7 @@ for root, dirs, files in os.walk(image_dir):
          if file.endswith("png")or file.endswith("jpg"):
              path = os.path.join(root, file)
              label = os.path.basename(os.path.dirname(path)).replace("", "-").lower()
-             #print(label,path)
+             print(label,path)
              if not label in label_ids:
                  label_ids[label] = current_id
                  current_id +=1
@@ -40,11 +40,11 @@ for root, dirs, files in os.walk(image_dir):
                  x_train.append(roi)
                  y_labels.append(id_)
             
-#print(y_labels)
-#print(x_train)            
+print(y_labels)
+print(x_train)            
 
 with open("labels.pickle", 'wb') as f:
     pickle.dump(label_ids, f)
-    
+     
 recognizer.train(x_train, np.array(y_labels))
 recognizer.save("trainner.yml")
