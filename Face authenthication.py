@@ -1,52 +1,43 @@
-import cv2 as cv
 import numpy as np
+import cv2
+import pickle
 
+face_cascade = cv2.CascadeClassifier('./haarcascade_frontalface_default.xml')
 
-face_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
-recognizer =  cv.face.LBPHFaceRecognizer_create();
-recognizer.read("recognizers/face-trainner.yml")
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+recognizer.read("./recognizers/face-trainner.yml")
 
+labels = {"person_name": 1}
+with open("./labels.pickle", 'rb') as f:
+  org_labels = pickle.load(f)
+  labels = {v:k for k,v in org_labels.items()}
 
-
-font = cv.FONT_HERSHEY_DUPLEX
-
-camera = cv.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 
 while(True):
-#Capture frame by Frame   
- ret, im =camera.read()
- gray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
- faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    # Capture frame-by-frame
+    ret, frame = cap.read()
+    gray  = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, 1.5, 5)
+    for (x, y, w, h) in faces:
+      roi_gray = gray[y:y+h, x:x+w] #(ycord_start, ycord_end)
+      roi_color = frame[y:y+h, x:x+w]
 
- for (x, y, w, h) in faces:
-     print(x,y,w,h)
-     roi_gray = gray[y:y+h, x:x+w]
-     roi_color = im[y:y+h, x:x+w]
-     
-     #recognize?
-     Id, conf = recognizer.predict(gray[y:y+h,x:x+w])
-     if(conf<55):
-        if(Id==1):
-          Id="Deo"
-        if(Id==2):
-          Id="name"
-        if(Id==4):
-          Id="name"
-         
-     else:
-          Id="Unknown"  
+      # recognize? deep learned model predict keras tensorflow pytorch scikit learn
+      idd, conf = recognizer.predict(roi_gray)
+      if conf>=4 and conf <= 85:
+        name = labels[idd]
+        cv2.putText(frame, name, (x,y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-     cv.putText(im,str(Id),(x,y+h),font,3,255)
-        
-     img_item = "my-image.png"
-     cv.imshow(img_item, roi_gray)
-     
-     cv.rectangle(im, (x,y) , (x+w, y+h) , (255, 0, 0), 3)
- 
-#Display resulting Frame
- cv.imshow('im', im)
- if cv.waitKey(10) & 0xFF==ord('q'):
-   break
-#When everything done,release camera
-camera.release()
-cv.destroyAllWindows()
+      img_item = "7.png"
+      cv2.imwrite(img_item, roi_color)
+      cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+
+    # Display the resulting frame
+    cv2.imshow('Camera',frame)
+    if cv2.waitKey(20) & 0xFF == ord('q'):
+        break
+
+# When everything done, release the capture
+cap.release()
+cv2.destroyAllWindows()
