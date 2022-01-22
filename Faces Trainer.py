@@ -28,7 +28,7 @@ for root, dirs, files in os.walk(image_dir):
             size = (550, 550)
             final_image = pil_image.resize(size, Image.ANTIALIAS)
             image_array = np.array(final_image, "uint8")
-            #print(image_array)
+
             faces = face_cascade.detectMultiScale(image_array, 1.5, 5)
 
             for (x,y,w,h) in faces:

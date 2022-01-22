@@ -15,15 +15,13 @@ with open("./labels.pickle", 'rb') as f:
 cap = cv2.VideoCapture(0)
 
 while(True):
-    # Capture frame-by-frame
     ret, frame = cap.read()
     gray  = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.5, 5)
     for (x, y, w, h) in faces:
-      roi_gray = gray[y:y+h, x:x+w] #(ycord_start, ycord_end)
+      roi_gray = gray[y:y+h, x:x+w]
       roi_color = frame[y:y+h, x:x+w]
 
-      # recognize? deep learned model predict keras tensorflow pytorch scikit learn
       idd, conf = recognizer.predict(roi_gray)
       if conf>=4 and conf <= 85:
         name = labels[idd]
@@ -38,6 +36,5 @@ while(True):
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
 
-# When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
