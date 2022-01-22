@@ -10,20 +10,20 @@ image_dir = os.path.join(BASE_DIR, "images")
 face_cascade = cv2.CascadeClassifier('./haarcascade_frontalface_default.xml')
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 
-current_id = 0
-label_ids = {}
-y_labels = []
-x_train = []
+currentid = 0
+labelsid = {}
+labely = []
+trainx = []
 
 for root, dirs, files in os.walk(image_dir):
     for file in files:
         if file.endswith("png") or file.endswith("jpg"):
             path = os.path.join(root, file)
             label = os.path.basename(root).replace(" ", "-").lower()
-            if not label in label_ids:
-                label_ids[label] = current_id
-                current_id += 1
-            id_ = label_ids[label]
+            if not label in labelsid:
+                labelsid[label] = currentid
+                currentid += 1
+            id_ = labelsid[label]
             pil_image = Image.open(path).convert("L") # grayscale
             size = (550, 550)
             final_image = pil_image.resize(size, Image.ANTIALIAS)
@@ -33,15 +33,15 @@ for root, dirs, files in os.walk(image_dir):
 
             for (x,y,w,h) in faces:
                 roi = image_array[y:y+h, x:x+w]
-                x_train.append(roi)
-                y_labels.append(id_)
+                trainx.append(roi)
+                labely.append(id_)
 
 
-print(y_labels)
-print(x_train)
+print(labely)
+print(trainx)
 
 with open("./labels.pickle", 'wb') as f:
-    pickle.dump(label_ids, f)
+    pickle.dump(labelsid, f)
 
-recognizer.train(x_train, np.array(y_labels))
+recognizer.train(trainx, np.array(labely))
 recognizer.save("recognizers/face-trainner.yml")
