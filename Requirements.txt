@@ -1,3 +1,8 @@
 opencv-python
 numpy
 pillow
+Download PIP
+Pip install opencv-contrib-python
+Pip install numpy
+pip install pickle
+Download CascadeClassifier of your choice
